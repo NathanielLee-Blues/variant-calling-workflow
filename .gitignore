@@ -1,0 +1,30 @@
+# System files
+.DS_Store
+*.tmp
+*.log
+
+# Downloaded archives
+data/reads/*.tar.gz
+data/reads/tmp_extract/
+
+# BWA / samtools reference index files
+data/reference/*.amb
+data/reference/*.ann
+data/reference/*.bwt
+data/reference/*.pac
+data/reference/*.sa
+data/reference/*.fai
+
+# Alignment intermediates
+results/alignment/*.sam
+results/alignment/*.bam
+results/alignment/*.bai
+
+# FastQC compressed output
+results/qc/*_fastqc.zip
+
+# Large FASTQ inputs are downloaded by script
+data/reads/*.fastq
+data/reads/*.fq
+data/reads/*.fastq.gz
+data/reads/*.fq.gz

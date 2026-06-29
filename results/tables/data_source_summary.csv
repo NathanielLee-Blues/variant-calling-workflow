@@ -1,0 +1,5 @@
+item,description
+reference,E. coli REL606 reference genome from NCBI assembly GCA_000017985.1
+reads,Small paired-end FASTQ subset from an E. coli long-term evolution experiment tutorial dataset
+sample,SRR2584866
+workflow_note,Real data are used; there is no simulated truth variant table in this version

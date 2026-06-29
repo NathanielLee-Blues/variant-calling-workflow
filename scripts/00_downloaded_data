@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+mkdir -p data/reference data/reads results/tables
+
+REFERENCE="data/reference/ecoli_rel606.fasta"
+REFERENCE_GZ="data/reference/ecoli_rel606.fasta.gz"
+READ_ARCHIVE="data/reads/sub.tar.gz"
+
+echo "Preparing E. coli REL606 reference genome..."
+
+if [ ! -f "$REFERENCE" ]; then
+  curl -L \
+    -o "$REFERENCE_GZ" \
+    https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/017/985/GCA_000017985.1_ASM1798v1/GCA_000017985.1_ASM1798v1_genomic.fna.gz
+
+  gunzip -f "$REFERENCE_GZ"
+else
+  echo "Reference already exists: $REFERENCE"
+fi
+
+echo "Downloading small real paired-end FASTQ dataset..."
+
+if [ ! -f "$READ_ARCHIVE" ]; then
+  curl -L \
+    -o "$READ_ARCHIVE" \
+    https://ndownloader.figshare.com/files/14418248
+else
+  echo "Read archive already exists: $READ_ARCHIVE"
+fi
+
+# Extract into a temporary folder so reruns are clean
+rm -rf data/reads/tmp_extract
+mkdir -p data/reads/tmp_extract
+tar -xzf "$READ_ARCHIVE" -C data/reads/tmp_extract
+
+# Find the paired FASTQ files wherever the archive placed them
+R1_FILE=$(find data/reads/tmp_extract -name "SRR2584866_1.trim.sub.fastq" | head -n 1)
+R2_FILE=$(find data/reads/tmp_extract -name "SRR2584866_2.trim.sub.fastq" | head -n 1)
+
+if [ -z "$R1_FILE" ] || [ -z "$R2_FILE" ]; then
+  echo "Could not find expected FASTQ files in archive."
+  echo "Files found:"
+  find data/reads/tmp_extract -type f
+  exit 1
+fi
+
+cp "$R1_FILE" data/reads/sample_R1.fastq
+cp "$R2_FILE" data/reads/sample_R2.fastq
+
+rm -rf data/reads/tmp_extract
+
+cat > results/tables/data_source_summary.csv <<'CSV'
+item,description
+reference,E. coli REL606 reference genome from NCBI assembly GCA_000017985.1
+reads,Small paired-end FASTQ subset from an E. coli long-term evolution experiment tutorial dataset
+sample,SRR2584866
+workflow_note,Real data are used; there is no simulated truth variant table in this version
+CSV
+
+echo "Real example data downloaded and prepared."
+echo "Reference: data/reference/ecoli_rel606.fasta"
+echo "Reads:"
+echo "- data/reads/sample_R1.fastq"
+echo "- data/reads/sample_R2.fastq"
